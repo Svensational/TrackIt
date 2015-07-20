@@ -1,0 +1,86 @@
+(kunos dateiformat) name.bb
+
+frames im video
+frame nr (bei 0 anfangen)
+anzahl objekte im frame
+#BBs für objekt (wie viele frames lebt das objekt)
+bounding boxen (top, left, width, height)
+...
+...
+
+
+[BB file]
+int   Number of frames
+Frames
+
+[Frame]
+int   Framenumber
+int   Number of objects starting in this frame
+Objects
+
+[Object]
+int   Number of Frames visible
+Bounding Boxes
+
+[Bounding Box]
+float;float;float;float  top, left, width, height
+
+
+
+
+[BTD file]
+quint8   'B' )
+quint8   'T' > magic number
+quint8   'D' )
+quint8   BTD version (currently 1)
+QString  Filename of the associated video file (can also contain a relative or absolute path)
+quint32  Current ID of the id counter
+quint32  Number of categories
+Categories
+
+[Category]
+QString  Name
+quint32  Number of objects
+Objects
+
+[Object]
+quint32  ID
+quint32  Number of bounding boxes
+Bounding Boxes
+
+[Bounding Box]
+quint8   Type (1=single, 2=key. Others shouldn't appear in a file)
+quint32  Framenumber
+//QRect    Position and size
+qint32   left
+qint32   top
+qint32   right
+qint32   bottom
+
+
+
+
+
+
+Shorter:
+[BTD file]
+quint8   'B' )
+quint8   'T' > magic number
+quint8   'D' )
+quint8   BTD version (currently 1)
+QString  Filename of the associated video file (can also contain a relative or absolute path)
+quint32  Current ID of the id counter
+QList<Category> Categories
+
+[Category]
+QString  Name
+QList<Object> objects
+
+[Object]
+quint32  ID
+QList<BBox> Bounding Boxes
+
+[BBox]
+quint8   Type (1=single, 2=key. Others shouldn't appear in a file)
+quint32  Framenumber
+QRect    Position and size

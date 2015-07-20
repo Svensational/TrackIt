@@ -1,0 +1,44 @@
+TODO:
+=====
+- implement arbitrary object names
+  - Viper doesn't support it anyway...
+
+== optional ==
+- redirect std::cout to qDebug
+- add command line convenience
+  - 1 parameter: open file
+  - 2 params: open and save as?
+- crop and scale video
+- show preview icons of the objects in the header view (needs QHeaderView::paintSection to be overloaded)
+- implement a settings widget to alter default settings
+- implement a bbox inspector to view/alter bbox data
+- small: Allow moving objects to other categories also when no video is loaded
+
+
+ViPER import
+============
+- config block gets ignored
+- others than the first sourcefile get ignored
+- file and content nodes get ignored
+- others than first attribute get ignored //maybe parse all?
+- others than data:bbox nodes get ignored
+
+BB Data:
+========
+- endlines are probably not system-independent. check and ix?
+
+Data strukture
+==============
+List of categories (e.g. "Person")
+Kategorie: List of objects
+Object: Map of BBs
+
+Packaging:
+==============
+
+Things to add to packaging:
+- Add doxygen documentation
+- Add manual.pdf
+- Add ReadMe
+- Windows: add Dlls
+- Convert EOL of ReadMe

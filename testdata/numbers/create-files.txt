@@ -1,0 +1,24 @@
+# to create a dozen images which have their framenumber in them:
+#for i in {001..250}; do convert -background lightblue -fill blue -font Times -pointsize 72 -size 360x84 label:"Frame $i" $i.png; done
+
+# create movie:
+mencoder "mf://*.png" -mf fps=25 -o output.avi -ovc lavc -lavcopts vcodec=mpeg4
+
+
+## nettes script von simon:
+#!/bin/bash
+seconds=10
+fps=24
+res=640x480
+font=$( identify -list font | grep Font\: | head -n1 | awk {'print $2'} )
+
+i=1
+while [ $i -le $(( seconds * 24 )) ]
+do
+    convert -size ${res} xc:white -font ${font} -pointsize 72 -draw "text 25,60 '$i'" $( printf "%010d" $i ).png
+    i=$(( $i + 1 ))
+done
+
+mencoder "mf://*.png" -ovc x264 -mf fps=${fps} -o output.avi
+
+

@@ -1,0 +1,91 @@
+\documentclass[english,a4paper,oneside,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{supertabular}
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{babel}
+\usepackage{hyperref}
+%\usepackage{amssymb}
+%\usepackage{theorem}
+\usepackage{float}
+\usepackage{longtable}
+\usepackage{color,colortbl}
+%\usepackage{verbatim}
+\usepackage{babelbib}
+\usepackage{pst-all}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{pdfpages}
+\usepackage{framed}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{wrapfig}
+\usepackage{pbox}
+%\usepackage[onehalfspacing]{setspace}
+
+\definecolor{tcA}{rgb}{0.627451,0.627451,0.643137}
+\renewcommand{\familydefault}{\sfdefault}
+\renewcommand{\arraystretch}{1.2}
+\newcommand{\settocdepth}[1]{\addtocontents{toc}{\protect\setcounter{tocdepth}{#1}}}
+
+% -------------------- Seitengroessen ----------------------
+
+%\addtolength{\topmargin}{2cm}
+\geometry{a4paper,top=35mm,left=25mm,right=25mm,bottom=25mm,headsep=10mm,footskip=12mm}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+
+
+% -------------------- Kapitelangabe oben ----------------------
+
+\pagestyle{fancy} % Dieser Befehl muss nach (!) \textwidth stehen!
+\cfoot{}
+%\renewcommand{\sectionmark}[1]{\markboth{#1\ }{}}
+
+\fancyhf{} %alle Kopf- und Fußzeilenfelder bereinigen
+\fancyhead[OL]{\leftmark} %Kopfzeile links
+\fancyhead[OC]{} %zentrierte Kopfzeile
+\fancyhead[OR]{\thepage} %Kopfzeile rechts
+\fancyhead[EL]{\thepage} %Kopfzeile links
+\fancyhead[EC]{} %zentrierte Kopfzeile
+\fancyhead[ER]{\leftmark} %Kopfzeile rechts
+
+
+\begin{document}
+\pagenumbering{roman}
+
+%--------------- Vorspann ----------------------------------
+
+\include{frontpage}      % Titelseite
+\clearpage
+
+\tableofcontents 
+\newpage
+
+%\fancyhead[OL]{VORWORT}
+%\include{Vorwort}
+%\clearpage
+
+%--------------- Hauptteil  (max. 30 Seiten) --------------
+
+\pagenumbering{arabic}
+
+\fancyhead[OL]{\leftmark}
+\include{maintext} 
+\clearpage
+
+\appendix
+\fancyhead[OL]{APPENDIX}
+\include{appendix}
+
+\fancyhead[OL]{\leftmark}
+\listoffigures     % Abbildungsverzeichnis
+\addcontentsline{toc}{section}{Images}
+\newpage
+
+
+\include{sources}            % Literaturverzeichnis
+\newpage
+
+%--------------- Anhang ------------------------------------
+\end{document}

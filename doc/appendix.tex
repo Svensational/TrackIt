@@ -1,0 +1,239 @@
+\addcontentsline{toc}{section}{Appendix}
+\section{Appendix A}
+   \subsection{File Formats}
+      \label{fileformats}
+      TrackIt supports a the following file formats currently supported file Formats include:\\
+      .bb, .btd, ViPER .xml  
+      However, not all file formats support all features of the other file formats or our program, loss of grouping and naming information may occur. however, there is never any loss of Bbox information.
+      This table shows which file formats support which features, the features being listed as:
+      \begin{description}
+         \item[Categories]One or more objects may be put together in a category tab, to simplyfy grouping objects.
+         \item[Holes] Allows objects to have frames with no bounding boxes between two frames with bounding boxes. If holes are not supported, objects will be split.
+         \item[Named Categories]Not only grouping information is saved, but also a label to each group, like „car“ and „persons“, or „animals“. If this is not possible, groups will be saved without a group name.
+         \item[Object names] Give Objects name instead of just a random number within their group.
+         \item[Keyframes] Supports saving of keybboxes and linearly interpolating in between them. If not possible to save keybboxes, these and their associated virtual Bboxes will be converted to single Bboxes.
+         \item[Run-length-encoding] Run-length-encoding saves space by saving the bbox position,first appearance and the duration of its presence there. If RLE is not possible, BBoxes will be converted to single keyboxes.
+      \end{description} 
+
+   \begin{table}[H]
+    %todo: sowohl überschrift als auch table linksbündig?
+     \centering
+     \label{features} 
+     \caption{supported features by File format}
+      \begin{tabular}[]{|l|c|c|c|c|c|c|}
+         \hline
+%                 &           &            &            &            \\  
+                 & Categories&  Holes     & Named Cat. & Obj. Names & Keyframes  & RLE\\\hline
+         .btd    &    X      &   X        &     X      &            &     X      & \\\hline
+        ViPer XML&    X      &   X        &     X      &          &              &  X \\\hline
+        .bb      &           &            &            &            &           &  \\\hline
+         \hline
+      \end{tabular}
+   \end{table}
+  
+   \subsubsection{.btd}
+      BTD (binary tracking data) is our own data format and therefore capable of saving all TrackIt data without any loss. The Data is saved in binary mode using QDataStream's serialization mechanisms in version 12 so it can be written and read on any platform where Qt is available. \\
+      The actual serialization of our internal data structure is specified in table \ref{tab:btdformat}.  For details on the serialization of Qt's own types like QString or QList see \href{http://qt-project.org/doc/qt-4.8/datastreamformat.html}{http://qt-project.org/doc/qt-4.8/datastreamformat.html}.
+
+
+      \begin{table}[h]
+         \centering
+         \caption{BTD file format}
+         \begin{tabular}{|l|l|}
+            \hline
+            \textbf{Type} & \textbf{Description} \\
+            \hline\hline
+            quint8 & Part of magic number, must be 0x42 ('B') \\
+            \hline
+            quint8 & Part of magic number, must be 0x54 ('T') \\
+            \hline
+            quint8 & Part of magic number, must be 0x44 ('D') \\
+            \hline
+            quint8 & BTD version (currently 1) \\
+            \hline
+            QString & Filename of the associated video file \\
+                    & (can also contain a relative or absolute path) \\
+            \hline
+            quint32 & Current ID of the ID counter \\
+                    & (Last assigned ID + 1) \\
+            \hline
+            QList<Category> & Categories \\
+            \hline \hline
+            \multicolumn{2}{|c|}{\textit{Category}} \\
+            \hline
+            QString & Name of the category \\
+            \hline
+            QList<Object> & Objects \\
+            \hline \hline
+            \multicolumn{2}{|c|}{\textit{Object}} \\
+            \hline
+            quint32 & ID of the object \\
+            \hline
+            QList<BBox> & Bounding Boxes \\
+            \hline \hline
+            \multicolumn{2}{|c|}{\textit{BBox}} \\
+            \hline
+            quint8 & Type (1=single, 2=key) \\
+            \hline
+            quint32 & Framenumber \\
+            \hline
+            QRect & Position and size \\
+            \hline
+         \end{tabular}
+         \label{tab:btdformat}
+      \end{table}
+  \subsubsection{ViPER xml File} 
+Open-standard xml document format introduced by the ViPER-toolkit.\\
+(see \href{http://viper-toolkit.sourceforge.net/}{http://viper-toolkit.sourceforge.net/}) This file format is more thoroughly described in\\
+ \href{http://viper-toolkit.sourceforge.net/docs/file/}{http://viper-toolkit.sourceforge.net/docs/file/}.
+.
+
+   \subsubsection{BB Files}
+   BB Files have a simple parsable file format. The first line containes the number of frames, followed by a list of all frames. Each of these frames consists of the numbers of objects that appear in this frame, followed by an object definition, or nothing in case the number of objects is "0". Each object definition contains its lifetime in frames (its first appearance is determined by the framenumber that holds its data), followed by a (possibly empty TODO: Möglich? ) list of bounding boxes. Each bounding Box consists of four integers: distance to top border of video, then distance to left border of video, width and height of video. The EBNF definition puts bb files in a more formal format: 
+Unfortunately, BB Files allows only saving of bboxes for consecutive frames for an object, so if there are "holes" without a bbox in between, this object will be split into as many new objects. as it takes to create only objects with consecutive frames.
+\begin{table}
+  \centering
+  \label{bbfiledef} 
+  \caption{BB File definition}
+   \begin{tabular}[h]{l@{}cl}
+      BBFILE   & ::=  & NUMBER\_OF\_FRAMES „$\backslash$n“          \\
+               &      & LIST\_OF\_ALL\_FRAMES            \\
+      LIST\_OF\_ALL\_FRAMES   & ::= &  NUMBER\_OF\_OBJECTS „$\backslash$n“\\
+               &      &       (OBJECT\_DEFINITION $|$ $\varepsilon$) \\
+      OBJECT\_DEFINITION  & ::=  & LIFETIME\_IN\_FRAMES „$\backslash$n“ \\
+               &      & LIST\_OF\_BBOX                   \\
+      LIST\_OF\_BBOX & ::=  & BBOX „$\backslash$n“                  \\
+               &     &   (LIST\_OF\_BBOX $|$ $\varepsilon$)       \\
+      BBOX     & ::= & NUMBER "\textvisiblespace" NUMBER "\textvisiblespace" NUMBER "\textvisiblespace" NUMBER \\
+           &   &// first number: Distance in pixels to top border of video  \\
+           &   &// second number: Distance in pixels to the left border.  \\
+           &   &// third number: Width in pixels.   \\
+           &   &// fourth number: Height in Pixels.  \\
+      NUMBER\_OF\_FRAMES & ::=  &  NUMBER\\
+      NUMBER\_OF\_OBJECTS & ::= & NUMBER \\
+      LIFETIME\_IN\_FRAMES & ::= &NUMBER \\
+      NUMBER & ::= & \pbox{12cm}{NUMBER NUMBER $|$ „0“ $|$ „1“ $|$ „2“ $|$ „3“ $|$ „4“ \\$|$ „5“ $|$ „6“ $|$ „7“ $|$ „8“ $|$ „9“} \\
+   
+%%      // note: The size of LIST\_OF\_BBOXES is the number of frames it appears in after the first frame.
+ %%     // note: ALL lists must have all objects in ascending order, even if these objects are empty.
+   \end{tabular}
+ \end{table} 
+
+%   \verb{BBFILE ::=  NUMBER_OF_FRAMES „\n“      
+%                     LIST_OF_ALL_FRAMES    
+%   LIST_OF_ALL_FRAMES ::=  NUMBER_OF_OBJECTS „\n“
+%                           (OBJECT_DEFINITION | \eps) 
+%   OBJECT_DEFINITION  ::=  LIFETIME_IN_FRAMES „\n“ 
+%                           LIST_OF_BBOX 
+%   LIST_OF_BBOX ::=  BBOX „\n“
+%                     LIST_OF_BBOX
+%                     | \eps
+%   BBOX ::=  NUMBER „ „ NUMBER „ „ NUMBER „ „ NUMBER
+%             // first number: Distance in pixels to top border of video
+%             // second number: Distance in pixels to the left border.
+%             // third number: Width in pixels. 
+%             // fourth number: Height in Pixels.
+%   NUMBER_OF_FRAMES ::=  NUMBER
+%   NUMBER_OF_OBJECTS ::= NUMBER
+%   LIFETIME_IN_FRAMES ::= NUMBER
+%   NUMBER ::= NUMBER NUMBER | „0“ | „1“ | "2" | „8“ | „9“ 
+%
+%   // note: The size of LIST_OF_BBOXES is the number of frames it appears in after the first frame.
+%   // note: ALL lists must have all objects in ascending order, even if these objects are empty.
+%   }
+
+      \begin{table}[H]
+         \centering
+         \caption{BB file format}
+         \begin{tabular}{|l|l|}
+            \hline
+            \textbf{Type} & \textbf{Description} \\
+            \hline\hline
+            Integer & Number of frames \\
+            \hline
+            Frame & First frame \\
+            Frame & Second frame \\
+            ... & ... \\
+            \hline \hline
+            \multicolumn{2}{|c|}{\textit{Frame}} \\
+            \hline
+            Integer & Framenumber \\
+            \hline
+            Integer & Number of objects starting in this frame \\
+            \hline
+            Object & First object \\
+            Object & Second object \\
+            ... & ... \\
+            \hline \hline
+            \multicolumn{2}{|c|}{\textit{Object}} \\
+            \hline
+            Integer & Lifetime in frames \\
+            \hline
+            BBox & First bounding box \\
+            BBox & Second bounding box \\
+            ... & ... \\
+            \hline \hline
+            \multicolumn{2}{|c|}{\textit{BBox}} \\
+            \hline
+            Float;Float;Float;Float & top, left, width, height \\
+            \hline
+         \end{tabular}
+         \label{tab:bbformat}
+      \end{table}      
+\newpage
+\section{Keyboard Shortcuts}
+   \begin{table}[H] 
+      \caption{File actions}
+      \label{fileactions} 
+
+      \begin{tabular}{|l|l|}
+         \hline
+         File Actions	 &	\\
+         \hline
+         Open Data File	 &      Ctrl+O	\\
+         Open Video File &      Ctrl+Shift+O	\\
+         Save Data File	 &      Ctrl+S	\\
+         Save Data as	 &      Ctrl+Shift+S	\\
+         Import Data     &      Ctrl+I	\\
+         Export Data	    &      Ctrl+E	\\
+         Quit Program	 &      Ctrl+Q	\\
+         \hline
+      \end{tabular}
+   \end{table}
+\vspace*{1cm}
+\begin{table}[H]
+   \caption{Movie/Data Actions}
+   \label{movieactions}
+   \begin{tabular}{|l|l|l|l|}
+      \hline
+      Action           & Keys & Alt. Keys & Alt. Key2 \\
+      \hline
+      Play/Pause       &      Space             &        &          \\
+      Next Frame       &      Cursor Right 		& D 		&  L       \\
+      Previous Frame   &      Cursor Left 		& A 		&  J       \\
+      Next Keyframe    &      Ctrl+Cursor Right	& Ctrl+D	& Ctrl+L   \\
+      Previous Keyframe&      Ctrl+Cursor Left 	& Ctrl+A &  Ctrl+J  \\
+      Next Category    &      E 		            & O    	&  Page Up \\
+      Previous Category&      Q 		            & U 	   &  Page Down\\
+      Next Object      &      Cursor Down 		& S 		&  K       \\
+      Previous Object  &      Cursor Up 		   & W 		&  I       \\
+      Create new Object&      Ctrl+R            &        &          \\
+      Create new BBox  &      Insert 		      & R 		&  Z       \\
+      Create new Key BBox &   Shift+Insert 		& F 		&  H       \\
+      Delete Marked BBox  &   Del               &        &          \\
+      Zoom in          &      Ctrl+“MWHEEL\_UP" & Ctrl+"+"&          \\
+      Zoom out         &      Ctrl+“MWHEEL\_DOWN"& Ctrl+"-"&          \\
+      Reset Zoom       &      Ctrl+0            &        &          \\
+      Zoom to Fit      &      Ctrl+Comma        &        &          \\
+      \hline
+   \end{tabular}
+\end{table}
+
+
+%\subsection{Known Bugs}
+%   \subsubsection{a}
+%      Video is not corresponding to opened Tracking Data File, or an error message similar to the following appears:\\
+%      \verb|[mpeg2video @ 0x4950db0] warning: first frame is no keyframe|\\
+%      This might happen because the first frame is no keyframe, and the underlying Video decoder that is used by OpenCV shows the first keyframe it is able to decode.
+%\begin{center}
+%\end{center}
